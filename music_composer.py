@@ -27,20 +27,26 @@ def build_model(input_shape, output_dim):
     model = Sequential()
     model.add(LSTM(128, input_shape=input_shape, return_sequences=True))
     model.add(Dropout(0.2))
-    model.add(LSTM(128))
+    model.add(LSTM(128, return_sequences=False))  # Note return_sequences=False in the last LSTM
     model.add(Dropout(0.2))
     model.add(Dense(output_dim, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
+
 # Generate Music Sequence
 def generate_sequence(model, seed_sequence, num_notes):
     seed_sequence = np.reshape(seed_sequence, (1, seed_sequence.shape[0], seed_sequence.shape[1]))
+    generated_sequence = []
+
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        prediction = np.reshape(prediction, (1, prediction.shape[1]))
-        seed_sequence = np.append(seed_sequence, prediction, axis=0)
-    return seed_sequence
+        prediction = np.reshape(prediction, (1, prediction.shape[1], prediction.shape[2]))
+        generated_sequence.append(prediction)
+        seed_sequence = np.concatenate([seed_sequence[:, 1:, :], prediction], axis=1)
+    
+    return np.squeeze(np.array(generated_sequence), axis=1)
+
 
 
 # Convert sequence to MIDI
