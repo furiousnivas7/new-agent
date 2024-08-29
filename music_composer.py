@@ -25,28 +25,25 @@ def preprocess_midi(file_path):
 # Build the LSTM Model
 def build_model(input_shape, output_dim):
     model = Sequential()
-    model.add(LSTM(128, input_shape=input_shape, return_sequences=True))
+    model.add(LSTM(128, input_shape=(input_shape[0], input_shape[1]), return_sequences=True))  # (3, 3)
     model.add(Dropout(0.2))
-    model.add(LSTM(128, return_sequences=False))  # Note return_sequences=False in the last LSTM
+    model.add(LSTM(128, return_sequences=False))
     model.add(Dropout(0.2))
     model.add(Dense(output_dim, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
 
+
 # Generate Music Sequence
 def generate_sequence(model, seed_sequence, num_notes):
+    seed_sequence = np.reshape(seed_sequence, (1, seed_sequence.shape[0], seed_sequence.shape[1]))  # Adjust to (1, 3, 3)
     generated_sequence = []
 
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        
-        # Reshape prediction to match the seed sequence's shape (1, 1, 3)
-        prediction = np.reshape(prediction, (1, 1, seed_sequence.shape[-1]))  
-        
+        prediction = np.reshape(prediction, (1, 1, seed_sequence.shape[-1]))
         generated_sequence.append(prediction)
-        
-        # Update the seed_sequence to include the new prediction
         seed_sequence = np.concatenate([seed_sequence[:, 1:, :], prediction], axis=1)
     
     return np.squeeze(np.array(generated_sequence), axis=1)
