@@ -37,12 +37,12 @@ def build_model(input_shape, output_dim):
 
 # Generate Music Sequence
 def generate_sequence(model, seed_sequence, num_notes):
-    seed_sequence = np.reshape(seed_sequence, (1, seed_sequence.shape[0], seed_sequence.shape[1]))  # Adjust to (1, 3, 3)
+    seed_sequence = np.reshape(seed_sequence, (1, seed_sequence.shape[0], seed_sequence.shape[1]))  # (1, 3, 3)
     generated_sequence = []
 
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        prediction = np.reshape(prediction, (1, 1, seed_sequence.shape[-1]))
+        prediction = np.reshape(prediction, (1, 1, prediction.shape[-1]))  # Adjust this based on the output shape
         generated_sequence.append(prediction)
         seed_sequence = np.concatenate([seed_sequence[:, 1:, :], prediction], axis=1)
     
