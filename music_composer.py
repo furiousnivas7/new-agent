@@ -41,7 +41,7 @@ def generate_sequence(model, seed_sequence, num_notes):
 
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        prediction = np.reshape(prediction, (1, 1, prediction.shape[1]))  # Fix reshaping here
+        prediction = np.reshape(prediction, (1, 1, seed_sequence.shape[2]))  # Reshape prediction to match seed_sequence
         generated_sequence.append(prediction)
         seed_sequence = np.concatenate([seed_sequence[:, 1:, :], prediction], axis=1)
     
