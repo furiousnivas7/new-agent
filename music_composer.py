@@ -3,15 +3,24 @@ import pretty_midi
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
+import os
 
 # Preprocess MIDI Files
 def preprocess_midi(file_path):
-    midi_data = pretty_midi.PrettyMIDI(file_path)
-    notes = []
-    for instrument in midi_data.instruments:
-        for note in instrument.notes:
-            notes.append([note.pitch, note.start, note.end])
-    return np.array(notes)
+    if not os.path.exists(file_path):
+        st.error(f"File {file_path} does not exist.")
+        return None
+    
+    try:
+        midi_data = pretty_midi.PrettyMIDI(file_path)
+        notes = []
+        for instrument in midi_data.instruments:
+            for note in instrument.notes:
+                notes.append([note.pitch, note.start, note.end])
+        return np.array(notes)
+    except EOFError:
+        st.error("Error reading the MIDI file. The file might be corrupted or empty.")
+        return None
 
 # Build the LSTM Model
 def build_model(input_shape, output_dim):
@@ -51,20 +60,21 @@ if st.button("Generate Music"):
     # Load and preprocess a MIDI file
     midi_data = preprocess_midi('data/your_midi_files.mid')
     
-    # Define input shape and output dimension
-    input_shape = (midi_data.shape[1], 3)
-    output_dim = 128
-    
-    # Build and load a trained model
-    model = build_model(input_shape, output_dim)
-    
-    # Assume the model is already trained for simplicity
-    seed_sequence = midi_data[:1]  # Use the first sequence as a seed
-    
-    generated_sequence = generate_sequence(model, seed_sequence, num_notes)
-    
-    midi_output = sequence_to_midi(generated_sequence)
-    midi_data_bytes = midi_output.write()
-    
-    st.audio(midi_data_bytes)
-    st.download_button("Download Music", data=midi_data_bytes, file_name="generated_music.mid")
+    if midi_data is not None:
+        # Define input shape and output dimension
+        input_shape = (midi_data.shape[1], 3)
+        output_dim = 128
+
+        # Build and load a trained model
+        model = build_model(input_shape, output_dim)
+
+        # Assume the model is already trained for simplicity
+        seed_sequence = midi_data[:1]  # Use the first sequence as a seed
+
+        generated_sequence = generate_sequence(model, seed_sequence, num_notes)
+
+        midi_output = sequence_to_midi(generated_sequence)
+        midi_data_bytes = midi_output.write()
+
+        st.audio(midi_data_bytes)
+        st.download_button("Download Music", data=midi_data_bytes, file_name="generated_music.mid")
