@@ -58,7 +58,7 @@ num_notes = st.slider("Number of Notes", 10, 100)
 
 if st.button("Generate Music"):
     # Load and preprocess a MIDI file
-    midi_data = preprocess_midi('data/your_midi_files.mid')
+    midi_data = preprocess_midi('data/BecauseOfYou.mid')
     
     if midi_data is not None:
         # Define input shape and output dimension
