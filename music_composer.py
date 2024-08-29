@@ -41,11 +41,12 @@ def generate_sequence(model, seed_sequence, num_notes):
 
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        prediction = np.reshape(prediction, (1, prediction.shape[1], prediction.shape[2]))
+        prediction = np.reshape(prediction, (1, 1, prediction.shape[1]))  # Fix reshaping here
         generated_sequence.append(prediction)
         seed_sequence = np.concatenate([seed_sequence[:, 1:, :], prediction], axis=1)
     
     return np.squeeze(np.array(generated_sequence), axis=1)
+
 
 
 
