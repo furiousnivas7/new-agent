@@ -35,10 +35,13 @@ def build_model(input_shape, output_dim):
 
 # Generate Music Sequence
 def generate_sequence(model, seed_sequence, num_notes):
+    seed_sequence = np.reshape(seed_sequence, (1, seed_sequence.shape[0], seed_sequence.shape[1]))
     for _ in range(num_notes):
         prediction = model.predict(seed_sequence)
-        seed_sequence = np.append(seed_sequence, prediction)
+        prediction = np.reshape(prediction, (1, prediction.shape[1]))
+        seed_sequence = np.append(seed_sequence, prediction, axis=0)
     return seed_sequence
+
 
 # Convert sequence to MIDI
 def sequence_to_midi(sequence):
